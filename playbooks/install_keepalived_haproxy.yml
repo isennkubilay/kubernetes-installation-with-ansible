@@ -1,0 +1,54 @@
+---
+- name: Install and configure Keepalived and HAProxy
+  hosts: control_plane
+  become: true
+  vars:
+    keepalived_config_file: /etc/keepalived/keepalived.conf
+    haproxy_config_file: /etc/haproxy/haproxy.cfg
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Keepalived and HAProxy
+      apt:
+        name:
+          - keepalived
+          - haproxy
+        state: present
+
+    - name: Configure Keepalived
+      template:
+        src: ../templates/keepalived.conf.j2
+        dest: "{{ keepalived_config_file }}"
+      notify: Restart Keepalived
+
+    - name: Configure HAProxy
+      template:
+        src: ../templates/haproxy.cfg.j2
+        dest: "{{ haproxy_config_file }}"
+      notify: Restart HAProxy
+
+    - name: Enable and start Keepalived
+      systemd:
+        name: keepalived
+        state: started
+        enabled: true
+
+    - name: Enable and start HAProxy
+      systemd:
+        name: haproxy
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Restart Keepalived
+      systemd:
+        name: keepalived
+        state: restarted
+
+    - name: Restart HAProxy
+      systemd:
+        name: haproxy
+        state: restarted

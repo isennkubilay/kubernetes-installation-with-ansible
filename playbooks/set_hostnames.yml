@@ -1,0 +1,23 @@
+---
+- name: Set hostnames for multiple hosts
+  hosts: all
+  become: true
+  tasks:
+    - name: Set the hostname
+      ansible.builtin.hostname:
+        name: "{{ new_hostname }}"
+
+    - name: Update /etc/hosts file
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        line: "127.0.1.1 {{ new_hostname }}"
+        state: present
+
+    - name: Verify the hostname
+      command: hostnamectl
+      register: hostname_status
+
+    - name: Display hostname verification
+      debug:
+        var: hostname_status.stdout

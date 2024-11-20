@@ -1,0 +1,32 @@
+---
+- name: Retrieve kubeadm join command and join worker nodes
+  hosts: all
+  become: true
+  tasks:
+    - name: Generate kubeadm join command on control plane
+      when: "'control_plane' in group_names"
+      command: kubeadm token create --print-join-command
+      register: join_command
+      run_once: true # Run only once on the control plane
+
+    - name: Save join command for debugging (control plane)
+      when: "'control_plane' in group_names"
+      debug:
+        msg: "{{ join_command.stdout }}"
+
+    - name: Distribute join command to worker nodes
+      when: "'worker_node' in group_names"
+      copy:
+        content: "{{ hostvars[groups['control_plane'][0]].join_command.stdout }}"
+        dest: /tmp/kubeadm_join_command.txt
+
+    - name: Read the kubeadm join command
+      when: "'worker_node' in group_names"
+      shell: cat /tmp/kubeadm_join_command.txt
+      register: join_command_worker
+
+    - name: Execute kubeadm join command
+      when: "'worker_node' in group_names"
+      command: "{{ join_command_worker.stdout }}"
+      args:
+        creates: /etc/kubernetes/kubelet.conf
