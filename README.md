@@ -86,4 +86,4 @@ Ensure necessary ports are open between nodes. Common ports include:
              +-----------------------------+   +---------------------------+
 
 
-   [SOLID Princible example for Kubernetes](https://kubilayisen.dev/kubilayisen/SOLID-example-for-Kubernetes-2a36819864f747a4add2b55e3177ecdb)
+   [SOLID Principle example for Kubernetes](https://kubilayisen.dev/kubilayisen/SOLID-example-for-Kubernetes-2a36819864f747a4add2b55e3177ecdb)
